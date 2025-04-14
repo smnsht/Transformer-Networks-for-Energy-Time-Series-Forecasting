@@ -3,10 +3,10 @@ import datetime
 import os
 from pathlib import Path
 
-import numpy as np
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import StandardScaler
-from torch.utils.data import Dataset
+import numpy as np # type: ignore
+from sklearn.linear_model import LinearRegression # type: ignore
+from sklearn.preprocessing import StandardScaler # type: ignore
+from torch.utils.data import Dataset # type: ignore
 
 from data_loading.standard_dataset import StandardDataset
 from data_loading.time_series import TimeSeriesDataframeLoader, TimeInterval

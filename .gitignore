@@ -126,3 +126,4 @@ dmypy.json
 
 # datasets
 /data/opsd-time_series-2020-10-06
+/data/time_series.sqlite*
