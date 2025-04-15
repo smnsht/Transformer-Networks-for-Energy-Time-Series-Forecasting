@@ -75,6 +75,7 @@ class TransformerDataset(Dataset, ABC):
                 .transform(load_data.reshape(-1, 1)) \
                 .flatten()
 
+        calendar = BadenWurttemberg()
         self.rows = []
         for index in range(0, len(time_stamps)):
             load_data_value = scaled_load_data[index]
@@ -82,20 +83,20 @@ class TransformerDataset(Dataset, ABC):
             hour_of_the_day_context = generate_cyclical_time_value(time_stamp.hour, 23)
             hour_of_the_week_context = generate_cyclical_time_value(convert_datetime_to_hour_of_the_week(time_stamp), 6)
             week_of_the_year_context = generate_cyclical_time_value(time_stamp.weekofyear, 53)
-
-            calendar = BadenWurttemberg()
             is_workday_context = calendar.is_working_day(time_stamp)
             is_holiday_context = calendar.is_holiday(time_stamp)
             is_previous_day_workday_context = calendar.is_working_day(time_stamp - datetime.timedelta(days=1))
             is_next_day_workday_context = calendar.is_working_day(time_stamp + datetime.timedelta(days=1))
-            is_christmas_time = datetime.date.fromisoformat(str(time_stamp.year) + '-12-23') < time_stamp \
-                                < datetime.date.fromisoformat(str(time_stamp.year) + '-12-28')
+            is_christmas_time = False             
 
             row = [
                 load_data_value,
-                hour_of_the_week_context[0], hour_of_the_week_context[1],
-                hour_of_the_day_context[0], hour_of_the_day_context[1],
-                week_of_the_year_context[0], week_of_the_year_context[1],
+                hour_of_the_week_context[0], 
+                hour_of_the_week_context[1],
+                hour_of_the_day_context[0], 
+                hour_of_the_day_context[1],
+                week_of_the_year_context[0], 
+                week_of_the_year_context[1],
                 is_christmas_time,
                 is_workday_context,
                 is_holiday_context,
