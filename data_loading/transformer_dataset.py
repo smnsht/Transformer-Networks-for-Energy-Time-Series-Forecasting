@@ -63,7 +63,7 @@ class TransformerDataset(Dataset, ABC):
         """
         # extract the unprocessed time series
         load_data = np.array(self._df[self._target_variable][::4])  # use hourly resolution
-        time_stamps = np.array(self._df[self._time_variable][::4])
+        time_stamps = np.array(self._df[self._time_variable][::4])        
 
         # scale the values
         if self._is_training_set:
@@ -77,6 +77,9 @@ class TransformerDataset(Dataset, ABC):
 
         calendar = BadenWurttemberg()
         self.rows = []
+        weekly_index_delta = 24 * 7
+        data_len = len(time_stamps)
+
         for index in range(0, len(time_stamps)):
             load_data_value = scaled_load_data[index]
             time_stamp = time_stamps[index]
@@ -87,23 +90,29 @@ class TransformerDataset(Dataset, ABC):
             is_holiday_context = calendar.is_holiday(time_stamp)
             is_previous_day_workday_context = calendar.is_working_day(time_stamp - datetime.timedelta(days=1))
             is_next_day_workday_context = calendar.is_working_day(time_stamp + datetime.timedelta(days=1))
-            is_christmas_time = False             
+            #is_christmas_time = False                                                 
+            
+            load_one_week_before = scaled_load_data[index - weekly_index_delta] if index - weekly_index_delta >= 0 else None
+            load_one_week_after = scaled_load_data[index + weekly_index_delta] if (index + weekly_index_delta) < data_len else None
 
-            row = [
-                load_data_value,
-                hour_of_the_week_context[0], 
-                hour_of_the_week_context[1],
-                hour_of_the_day_context[0], 
-                hour_of_the_day_context[1],
-                week_of_the_year_context[0], 
-                week_of_the_year_context[1],
-                is_christmas_time,
-                is_workday_context,
-                is_holiday_context,
-                is_previous_day_workday_context,
-                is_next_day_workday_context
-            ]
-            self.rows.append(row)
-
+            if load_one_week_after and load_one_week_before:                
+                row = [
+                    load_data_value,
+                    hour_of_the_week_context[0], 
+                    hour_of_the_week_context[1],
+                    hour_of_the_day_context[0], 
+                    hour_of_the_day_context[1],
+                    week_of_the_year_context[0], 
+                    week_of_the_year_context[1],
+                    #is_christmas_time,
+                    load_one_week_before,
+                    load_one_week_after,
+                    is_workday_context,
+                    is_holiday_context,
+                    is_previous_day_workday_context,
+                    is_next_day_workday_context
+                ]
+                self.rows.append(row)
+        # end for
         self.rows = torch.tensor(np.array(self.rows, dtype=np.float32))
         self.time_labels = np.array(time_stamps[self._time_series_window_in_hours: -self._forecasting_horizon_in_hours])
