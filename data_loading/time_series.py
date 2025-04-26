@@ -42,8 +42,13 @@ class TimeSeriesDataframeLoader:
         :param time_variable: indicates the column in the csv-file, which contains the time information for the series
         """
         self.time_variable = time_variable
-        self.csv_dataframe = self.load_dataframe_from_csv(path_to_csv, [time_variable],
-                                                          [time_variable, target_variable])
+        self.csv_dataframe = self.load_dataframe_from_csv(path_to_csv, 
+                                                          [ time_variable ],
+                                                          [ time_variable, 
+                                                            target_variable, 
+                                                            'DE_solar_generation_actual', 
+                                                            'DE_wind_generation_actual'])
+        self.csv_dataframe.fillna(0, inplace=True)
 
     def get_train_validation_test_datasets(self, train_set_time_interval: TimeInterval,
                                            validation_set_time_interval: TimeInterval,

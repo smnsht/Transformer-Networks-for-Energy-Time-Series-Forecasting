@@ -63,22 +63,30 @@ class TransformerDataset(Dataset, ABC):
         """
         # extract the unprocessed time series
         load_data = np.array(self._df[self._target_variable][::4])  # use hourly resolution
-        time_stamps = np.array(self._df[self._time_variable][::4])        
+        time_stamps = np.array(self._df[self._time_variable][::4]) 
+
+        # AFEKA: add solar & wind generation
+        solar_generation = np.array(self._df['DE_solar_generation_actual'][::4])
+        wind_generation = np.array(self._df['DE_wind_generation_actual'][::4])
 
         # scale the values
         if self._is_training_set:
             scaled_load_data = self._time_series_scaler \
                 .fit_transform(load_data.reshape(-1, 1)) \
                 .flatten()
+            
+            solar_generation_scaled = self._time_series_scaler.fit_transform(solar_generation.reshape(-1, 1)).flatten()
+            wind_generation_scaled = self._time_series_scaler.fit_transform(wind_generation.reshape(-1, 1)).flatten()
         else:
             scaled_load_data = self._time_series_scaler \
                 .transform(load_data.reshape(-1, 1)) \
                 .flatten()
+            
+            solar_generation_scaled = self._time_series_scaler.transform(solar_generation.reshape(-1, 1)).flatten()
+            wind_generation_scaled = self._time_series_scaler.transform(wind_generation.reshape(-1, 1)).flatten()
 
         calendar = BadenWurttemberg()
         self.rows = []
-        weekly_index_delta = 24 * 7
-        data_len = len(time_stamps)
 
         for index in range(0, len(time_stamps)):
             load_data_value = scaled_load_data[index]
@@ -90,11 +98,10 @@ class TransformerDataset(Dataset, ABC):
             is_holiday_context = calendar.is_holiday(time_stamp)
             is_previous_day_workday_context = calendar.is_working_day(time_stamp - datetime.timedelta(days=1))
             is_next_day_workday_context = calendar.is_working_day(time_stamp + datetime.timedelta(days=1))
-            #is_christmas_time = False                                                 
+            #is_christmas_time = False       
+            solar_generation_value = solar_generation_scaled[index]
+            wind_generation_value = wind_generation_scaled[index]
             
-            load_one_week_before = scaled_load_data[index - weekly_index_delta] if index - weekly_index_delta >= 0 else load_data_value
-            load_one_week_after  = scaled_load_data[index + weekly_index_delta] if (index + weekly_index_delta) < data_len else load_data_value
-
             row = [
                 load_data_value,
                 hour_of_the_week_context[0], 
@@ -104,8 +111,8 @@ class TransformerDataset(Dataset, ABC):
                 week_of_the_year_context[0], 
                 week_of_the_year_context[1],
                 #is_christmas_time,
-                load_one_week_before,
-                load_one_week_after,
+                solar_generation_value,
+                wind_generation_value,
                 is_workday_context,
                 is_holiday_context,
                 is_previous_day_workday_context,
