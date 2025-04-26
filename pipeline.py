@@ -97,62 +97,69 @@ class Pipeline:
                 model_wrapper = PytorchNeuralNetModelWrapper(model, self.model_type, self.args)
 
         else:  # Transformer models
-            # convert the the raw data into the preprocessed datasets
-            train_dataset = TransformerDataset(
-                train, UTC_TIMESTAMP, TARGET_VARIABLE, self.window_length,
+            afeka_dataset = TransformerDataset(
+                dfl.csv_dataframe, UTC_TIMESTAMP, TARGET_VARIABLE, self.window_length,
                 self.forecasting_horizon, self.args.transformer_labels_count,
                 self.predict_single_value, self.include_time_context, scaler, True)
-            validation_dataset = TransformerDataset(
-                validation, UTC_TIMESTAMP, TARGET_VARIABLE, self.window_length,
-                self.forecasting_horizon, self.args.transformer_labels_count,
-                self.predict_single_value, self.include_time_context, scaler, False)
-            test_dataset = TransformerDataset(
-                test, UTC_TIMESTAMP, TARGET_VARIABLE, self.window_length,
-                self.forecasting_horizon, self.args.transformer_labels_count,
-                self.predict_single_value, self.include_time_context, scaler, False)
+            
+            # convert the the raw data into the preprocessed datasets
+            # train_dataset = TransformerDataset(
+            #     train, UTC_TIMESTAMP, TARGET_VARIABLE, self.window_length,
+            #     self.forecasting_horizon, self.args.transformer_labels_count,
+            #     self.predict_single_value, self.include_time_context, scaler, True)
+            # validation_dataset = TransformerDataset(
+            #     validation, UTC_TIMESTAMP, TARGET_VARIABLE, self.window_length,
+            #     self.forecasting_horizon, self.args.transformer_labels_count,
+            #     self.predict_single_value, self.include_time_context, scaler, False)
+            # test_dataset = TransformerDataset(
+            #     test, UTC_TIMESTAMP, TARGET_VARIABLE, self.window_length,
+            #     self.forecasting_horizon, self.args.transformer_labels_count,
+            #     self.predict_single_value, self.include_time_context, scaler, False)
 
             # differentiate between the three available transformer models
-            if self.model_type == ModelType.TimeSeriesTransformer:
-                model = TimeSeriesTransformer(
-                    d_model=self.args.transformer_d_model,
-                    input_features_count=self.args.transformer_input_features_count,
-                    num_encoder_layers=self.args.transformer_num_encoder_layers,
-                    num_decoder_layers=self.args.transformer_num_decoder_layers,
-                    dim_feedforward=self.args.transformer_dim_feedforward,
-                    dropout=self.args.transformer_dropout,
-                    attention_heads=self.args.transformer_attention_heads)
-            elif self.model_type == ModelType.TimeSeriesTransformerWithConvolutionalAttention:
-                model = TimeSeriesTransformerWithConvolutionalAttention(
-                    d_model=self.args.transformer_d_model,
-                    input_features_count=self.args.transformer_input_features_count,
-                    num_encoder_layers=self.args.transformer_num_encoder_layers,
-                    num_decoder_layers=self.args.transformer_num_decoder_layers,
-                    dim_feedforward=self.args.transformer_dim_feedforward,
-                    dropout=self.args.transformer_dropout,
-                    attention_heads=self.args.transformer_attention_heads)
-            else:
-                model = Informer(input_features_count=self.args.transformer_input_features_count,
-                                 d_model=self.args.transformer_d_model,
-                                 d_ff=self.args.transformer_dim_feedforward,
-                                 e_layers=self.args.transformer_num_encoder_layers,
-                                 d_layers=self.args.transformer_num_decoder_layers,
-                                 n_heads=self.args.transformer_attention_heads,
-                                 dropout=self.args.transformer_dropout,
-                                 attn='full')
+            # if self.model_type == ModelType.TimeSeriesTransformer:
+            #     model = TimeSeriesTransformer(
+            #         d_model=self.args.transformer_d_model,
+            #         input_features_count=self.args.transformer_input_features_count,
+            #         num_encoder_layers=self.args.transformer_num_encoder_layers,
+            #         num_decoder_layers=self.args.transformer_num_decoder_layers,
+            #         dim_feedforward=self.args.transformer_dim_feedforward,
+            #         dropout=self.args.transformer_dropout,
+            #         attention_heads=self.args.transformer_attention_heads)
+            # elif self.model_type == ModelType.TimeSeriesTransformerWithConvolutionalAttention:
+            #     model = TimeSeriesTransformerWithConvolutionalAttention(
+            #         d_model=self.args.transformer_d_model,
+            #         input_features_count=self.args.transformer_input_features_count,
+            #         num_encoder_layers=self.args.transformer_num_encoder_layers,
+            #         num_decoder_layers=self.args.transformer_num_decoder_layers,
+            #         dim_feedforward=self.args.transformer_dim_feedforward,
+            #         dropout=self.args.transformer_dropout,
+            #         attention_heads=self.args.transformer_attention_heads)
+            # else:
+            #     model = Informer(input_features_count=self.args.transformer_input_features_count,
+            #                      d_model=self.args.transformer_d_model,
+            #                      d_ff=self.args.transformer_dim_feedforward,
+            #                      e_layers=self.args.transformer_num_encoder_layers,
+            #                      d_layers=self.args.transformer_num_decoder_layers,
+            #                      n_heads=self.args.transformer_attention_heads,
+            #                      dropout=self.args.transformer_dropout,
+            #                      attn='full')
 
-            model_wrapper = PytorchTransformerModelWrapper(model, self.model_type, self.args)
+            # model_wrapper = PytorchTransformerModelWrapper(model, self.model_type, self.args)
 
         # train the model
-        training_report = model_wrapper.train(train_dataset, validation_dataset)
+        #training_report = model_wrapper.train(train_dataset, validation_dataset)
 
         # evaluate the model on the test data
-        test_outputs, test_targets = model_wrapper.predict(test_dataset)
-        time_labels: np.ndarray = test_dataset.time_labels
-        evaluator = Evaluator(test_outputs, test_targets, time_labels, scaler, self.forecasting_horizon)
-        evaluation = evaluator.evaluate()
+        #test_outputs, test_targets = model_wrapper.predict(test_dataset)
+        #time_labels: np.ndarray = test_dataset.time_labels
+        #evaluator = Evaluator(test_outputs, test_targets, time_labels, scaler, self.forecasting_horizon)
+        #evaluation = evaluator.evaluate()
 
-        self.experiment = Experiment(model_wrapper, evaluation, self.args, training_report)
-        print(str(self.experiment))
+        #self.experiment = Experiment(model_wrapper, evaluation, self.args, training_report)
+        #print(str(self.experiment))
+        afeka_dataset._afeka_df.to_csv('Transformer.DE.csv', index=False)        
+        print(afeka_dataset)
 
     def save_to_file(self):
         """

@@ -90,7 +90,7 @@ class TransformerDataset(Dataset, ABC):
             is_christmas_time = False             
 
             row = [
-                load_data_value,
+                time_stamp,             # Afeka: hourly time_stamp                
                 hour_of_the_week_context[0], 
                 hour_of_the_week_context[1],
                 hour_of_the_day_context[0], 
@@ -101,9 +101,28 @@ class TransformerDataset(Dataset, ABC):
                 is_workday_context,
                 is_holiday_context,
                 is_previous_day_workday_context,
-                is_next_day_workday_context
+                is_next_day_workday_context,
+                load_data[index]         # Afeka: total load
             ]
             self.rows.append(row)
 
-        self.rows = torch.tensor(np.array(self.rows, dtype=np.float32))
+        ############################################################################
+        self._afeka_df = pd.DataFrame(self.rows,  columns=[ 'date',
+                                                    'hour_of_the_week0',
+                                                    'hour_of_the_week1',
+                                                    'hour_of_the_day0',
+                                                    'hour_of_the_day1',
+                                                    'week_of_the_year0',
+                                                    'week_of_the_year1',
+                                                    'is_christmas_time',
+                                                    'is_workday_context',
+                                                    'is_holiday_context',
+                                                    'is_previous_day_workday',
+                                                    'is_next_day_workday',
+                                                    'OT'
+                                                  ])
+                
+        ############################################################################
+
+        #self.rows = torch.tensor(np.array(self.rows, dtype=np.float32))
         self.time_labels = np.array(time_stamps[self._time_series_window_in_hours: -self._forecasting_horizon_in_hours])
